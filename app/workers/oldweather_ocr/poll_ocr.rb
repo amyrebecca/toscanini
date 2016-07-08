@@ -1,11 +1,7 @@
-require 'sidekiq'
-
 module Toscanini
   module Workers
     module OldWeatherOCR
-      class PollOCR
-
-        include Sidekiq::Worker
+      class PollOCR < ConfigurableWorker
 
         attr_reader :client
 

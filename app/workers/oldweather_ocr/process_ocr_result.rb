@@ -1,10 +1,7 @@
-
-require 'sidekiq'
-
 module Toscanini
   module Workers
     module OldWeatherOCR
-      class ProcessOCRResult
+      class ProcessOCRResult < ConfigurableWorker
         attr_reader :client
 
         def initialize()

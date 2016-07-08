@@ -1,11 +1,7 @@
-require 'sidekiq'
-
 module Toscanini
   module Workers
     module OldWeatherOCR
-      class RequestOCR
-
-        include Sidekiq::Worker
+      class RequestOCR < ConfigurableWorker
 
         attr_reader :client
 
