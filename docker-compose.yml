@@ -17,7 +17,7 @@ tosca:
     - redis
     - postgres
   ports:
-    - '3000:3000'
+    - "3000:3000"
   volumes:
     - .:/tosca
 

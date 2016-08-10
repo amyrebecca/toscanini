@@ -20,7 +20,8 @@ module Toscanini
         end
 
         recurrence do
-          hourly(1)
+          # hourly(1)
+          minutely(5)
         end
 
         def perform
@@ -30,7 +31,7 @@ module Toscanini
             retirees = client.fetch_retired OldWeatherGridWorkflowId #, lastTimestamp
 
             retirees.each do | subject |
-              RequestAggregation.perform_async OldWeatherGridWorkflowId, subject.id
+              RequestAggregation.perform_async subject, OldWeatherGridWorkflowId
             end
           rescue NotImplementedError => ex
             logger.warn "Could not process retired subjects: #{ex.to_s}"

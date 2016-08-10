@@ -1,7 +1,9 @@
 module Toscanini
   module Workers
     module OldWeatherOCR
-      class RequestAggregation < ConfigurableWorker
+      class RequestAggregation
+
+        include Sidekiq::Worker
 
         attr_reader :client
 
@@ -9,24 +11,21 @@ module Toscanini
         ToscaniniCallbackEndpoint = "http://localhost:3000/"
 
         def initialize()
-          aggregation_config = load_config("aggregation.yml", "development")
-          # TODO: move to aggregation service constructor
-          @client = Toscanini::Services::PanoptesAggregation.new(aggregation_config.fetch("host"),
-                                                 aggregation_config.fetch("user"),
-                                                 aggregation_config.fetch("application"))
+          @client = Toscanini::Services::PanoptesAggregation.new()
         end
 
-        def perform(workflow_id, subject_id)
-          logger.debug "requesting aggregation for subject #{subject_id} in workflow #{workflow_id}"
+        def perform(subject, workflow_id)
+          return unless subject && subject.id
+
+          logger.debug "requesting aggregation for subject #{subject.id} in workflow #{workflow_id}"
 
           begin
-            client.aggregate_subject workflow_id, subject_id, ToscaniniCallbackEndpoint
+            client.aggregate_subject subject, workflow_id, ToscaniniCallbackEndpoint
+            # note that processing will resume from this point when the aggregation web service
+            # calls our web service back with the aggregation results
           rescue NotImplementedError => ex
-            logger.warn "Could not request aggregation for retired subject #{subject_id} in workflow #{workflow_id}: #{ex.to_s}"
+            logger.warn "Could not request aggregation for retired subject #{subject.id} in workflow #{workflow_id}: #{ex.to_s}"
           end
-
-          # testing purposes
-          RequestOCR.perform_async "file name", 8
         end
 
       end

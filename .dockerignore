@@ -1,3 +1,3 @@
 .dockerignore
 Gemfile.lock
-tmp/pids
+tmp/*

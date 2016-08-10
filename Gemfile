@@ -11,8 +11,11 @@ gem 'jbuilder', '~> 2.0'
 gem 'sdoc', '~> 0.4.0', group: :doc
 
 gem 'aws-sdk-v1'
+gem 'doorkeeper'
 gem 'dotenv'
 gem 'faraday'
+gem 'faraday_middleware'
+gem 'faraday-http-cache'
 # gem 'puma'
 gem 'jdbc-postgres'
 gem 'activerecord-jdbcpostgresql-adapter'
