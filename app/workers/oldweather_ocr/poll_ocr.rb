@@ -13,16 +13,16 @@ module Toscanini
           false
         end
 
-        def perform(subject_id)
+        def perform(name, subject_id)
           begin
-            result = client.check_ocr_progress subject_id
+            result = client.check_ocr_progress name
             if is_ready? result
-              ProcessOCRResult.perform_async subject_id
+              ProcessOCRResult.perform_async name, subject_id
             else
-              sleep 5
-              PollOCR.perform_async subject_id
+              self.class.perform_in(30.seconds, name, subject_id)
             end
           rescue Exception => ex
+            #TODO: probably log something sensible here
           end
         end
 

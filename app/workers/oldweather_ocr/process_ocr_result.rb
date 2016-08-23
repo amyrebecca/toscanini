@@ -8,8 +8,9 @@ module Toscanini
           @client = ::Toscanini::Services::Nanoweather.new()
         end
 
-        def perform(subject_id)
-          result = client.fetch_ocr subject_id
+        def perform(name, subject_id)
+          result = client.fetch_ocr name, subject_id
+          logger.info "it worked"
           #TODO: process OCR extracts
         end
       end

@@ -20,8 +20,7 @@ module Toscanini
         end
 
         recurrence do
-          # hourly(1)
-          minutely(5)
+          hourly(1)
         end
 
         def perform

@@ -1,23 +1,21 @@
 module Toscanini
   module Workers
     module OldWeatherOCR
-      class RequestOCR < ConfigurableWorker
+      class RequestOCR
+
+        include Sidekiq::Worker
 
         attr_reader :nano_client
-        attr_reader :panoptes_client
 
         def initialize()
           @nano_client = ::Toscanini::Services::Nanoweather.new()
-          @panoptes_client = ::Toscanini::Services::Panoptes.new()
         end
 
-        def perform(subject_id, workflow_id, aggregation_results=nil)
+        def perform(subject_id, workflow_id, location, aggregation_results=nil)
           logger.info "OCR-ing subject #{subject_id}"
 
           return unless aggregation_results # TODO: log that something went wrong
 
-          subject = panoptes_client.fetch_subject(subject_id)
-          location = subject.locations[0][subject.locations[0].keys.first]
           rows = parse aggregation_results
           fields = []
 
@@ -29,16 +27,15 @@ module Toscanini
 
           begin
             # ask nanoweather to ocr the fields
-            ocr_name = "ocr_#{subject_id}_#{workflow_id}"
+            ocr_name = "zooniverse_#{subject_id}_#{workflow_id}"
             nano_client.request_ocr ocr_name, location, fields
 
             # check every so often to see when the request is done
-            PollOCR.perform_async ocr_name
+            PollOCR.perform_in(30.seconds, ocr_name, subject_id)
           rescue NotImplementedError => ex
-            logger.warn "Failed to request OCR of subject #{name}: #{ex.to_s}"
+            logger.warn "Failed to request OCR of subject #{ocr_name}: #{ex.to_s}"
           rescue Exception => ex
-            # TODO: rescue more specific errors
-            logger.warn "Failed to request OCR of subject #{name}: #{ex.to_s}"
+            logger.warn "Failed to request OCR of subject #{ocr_name}: #{ex.to_s}"
             raise
           end
 
