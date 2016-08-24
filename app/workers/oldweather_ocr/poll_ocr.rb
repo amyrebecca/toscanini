@@ -1,7 +1,11 @@
 module Toscanini
   module Workers
     module OldWeatherOCR
-      class PollOCR < ConfigurableWorker
+      class PollOCR
+
+        include Sidekiq::Worker
+
+        sidekiq_options :retry => false
 
         attr_reader :client
 

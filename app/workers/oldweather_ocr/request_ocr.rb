@@ -1,9 +1,12 @@
+require 'csv'
+
 module Toscanini
   module Workers
     module OldWeatherOCR
       class RequestOCR
 
         include Sidekiq::Worker
+        sidekiq_options :retry => false
 
         attr_reader :nano_client
 
@@ -12,23 +15,26 @@ module Toscanini
         end
 
         def perform(subject_id, workflow_id, location, aggregation_results=nil)
+
           logger.info "OCR-ing subject #{subject_id}"
 
           return unless aggregation_results # TODO: log that something went wrong
 
-          rows = parse aggregation_results
-          fields = []
-
-          # build field hashes for each row with enough matches
-          rows.each do | row |
-            next if row[:boxes_in_cluster] < 5
-            fields.push (pluck row)
-          end
-
           begin
+            rows = parse aggregation_results
+            fields = []
+
+            # build field hashes for each row with enough matches
+            rows.each do | row |
+              next if row[:boxes_in_cluster] < 5
+              fields.push (pluck row)
+            end
+
             # ask nanoweather to ocr the fields
-            ocr_name = "zooniverse_#{subject_id}_#{workflow_id}"
-            nano_client.request_ocr ocr_name, location, fields
+            ocr_name = "zooniverse_#{subject_id}_#{workflow_id}_#{Time.now.getutc.to_i}"
+
+            logger.info "Requesting OCR for #{ocr_name}"
+            nano_client.request_ocr ocr_name, location, fields, logger
 
             # check every so often to see when the request is done
             PollOCR.perform_in(30.seconds, ocr_name, subject_id)
@@ -54,7 +60,7 @@ module Toscanini
           CSV::Converters[:blank_to_nil] = lambda do |field|
             field && field.empty? ? nil : field
           end
-          csv = CSV.new(body, :headers => true, :header_converters => :symbol, :converters => [:all, :blank_to_nil])
+          csv = CSV.new(aggregation_result, :headers => true, :header_converters => :symbol, :converters => [:all, :blank_to_nil])
           csv.to_a.map {|row| row.to_hash }
         end
 

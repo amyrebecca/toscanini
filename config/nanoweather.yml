@@ -1,11 +1,9 @@
 development:
   host: "http://securenanoark.com:9999"
-  # host: "http://securenanoark.com:9999/NanoWeather/rest/NanoWeather"
   user: 1
   application: 1
 
 test:
   host: "http://securenanoark.com:9999"
-  # host: "http://securenanoark.com:9999/NanoWeather/rest/NanoWeather"
   user: 1
   application: 1

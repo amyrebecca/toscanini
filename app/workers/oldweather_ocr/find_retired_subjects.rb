@@ -36,8 +36,6 @@ module Toscanini
             logger.warn "Could not process retired subjects: #{ex.to_s}"
           end
 
-          # testing purposes
-          RequestAggregation.perform_async OldWeatherGridWorkflowId, 4
         end
 
       end

@@ -18,19 +18,22 @@ module Toscanini
       end
 
       def connect!(adapter)
-        Faraday.new host do |faraday|
+        # TODO: why isn't this reading the config file correctly
+        # Faraday.new host do |faraday|
+        Faraday.new "http://securenanoark.com:9999" do |faraday|
           faraday.response :json, content_type: /\bjson$/
           faraday.use :http_cache, store: Rails.cache, logger: Rails.logger
           faraday.adapter(*adapter)
         end
       end
 
-      def request_ocr(name, location, fields)
+      def request_ocr(name, location, fields, logger)
 
         #call to addimage
         request = "#{NANO_API_PATH}/addImage/#{name}"
-        request += "#{field.width}/#{field.height}/"
-        request += "#{location}/1500/2193" #TODO: we want them to remove these params
+        request += "/#{location}/1500/2193" #TODO: we want them to remove these params
+
+        logger.info "Attempting to add image: #{request}"
 
         resp = connection.get(request) do |req|
           req.headers["Accept"] = "application/json"
@@ -42,15 +45,18 @@ module Toscanini
 
         #call to addimagefields
         fields = fields.slice 0..5
+        field_ids  = (0..5).to_a * ";"
         request = "#{NANO_API_PATH}/addImageFields/#{name}"
 
-        fields  = *(0..5)                                   * ";"
-        lefts   = (fields.collect { |field| field.left   }) * ";"
-        tops    = (fields.collect { |field| field.top    }) * ";"
-        heights = (fields.collect { |field| field.height }) * ";"
-        widths  = (fields.collect { |field| field.width  }) * ";"
+        lefts   = (fields.collect { |field| field[:left].round   }) * ";"
+        tops    = (fields.collect { |field| field[:top].round    }) * ";"
+        heights = (fields.collect { |field| field[:height].round }) * ";"
+        widths  = (fields.collect { |field| field[:width].round  }) * ";"
 
-        request += "/#{fields}/#{lefts}/#{tops}/#{heights}/#{widths}/0.2/0.8" #TODO: remove params
+        request += "/#{field_ids}/#{lefts}/#{tops}/#{heights}/#{widths}/0.2/0.8" #TODO: remove params
+
+        logger.info "Attempting to add fields: #{request}"
+
         resp = connection.get(request) do |req|
           req.headers["Accept"] = "application/json"
           req.headers["Content-Type"] = "application/json"
