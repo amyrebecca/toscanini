@@ -19,14 +19,15 @@ module Toscanini
 
         def perform(name, subject_id)
           begin
-            result = client.check_ocr_progress name
+            result = client.check_ocr_progress name, logger
             if is_ready? result
               ProcessOCRResult.perform_async name, subject_id
             else
               self.class.perform_in(30.seconds, name, subject_id)
             end
           rescue Exception => ex
-            #TODO: probably log something sensible here
+            self.class.perform_in(30.seconds, name, subject_id)
+            raise
           end
         end
 

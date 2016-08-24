@@ -6,6 +6,8 @@ module Toscanini
       class RequestOCR
 
         include Sidekiq::Worker
+
+        #TODO: remove when stable
         sidekiq_options :retry => false
 
         attr_reader :nano_client

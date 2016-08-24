@@ -9,6 +9,7 @@ module Toscanini
       self.api_prefix = "nanoweather"
 
       NANO_API_PATH = "/Nanoweather/rest/Nanoweather"
+      MAX_FIELDS = 19
 
       attr_reader :connection
 
@@ -27,15 +28,29 @@ module Toscanini
         end
       end
 
-      def request_ocr(name, location, fields, logger)
+      def request_ocr(name, location, fields, logger = nil)
 
         #call to addimage
-        request = "#{NANO_API_PATH}/addImage/#{name}"
-        request += "/#{location}/1500/2193" #TODO: we want them to remove these params
+        addImage = "#{NANO_API_PATH}/addImage/#{name}"
+        addImage += "/#{location}/1500/2193" #TODO: we want them to remove these params
 
-        logger.info "Attempting to add image: #{request}"
 
-        resp = connection.get(request) do |req|
+        #call to addimagefields
+        fields = fields.slice 0..MAX_FIELDS
+        field_ids  = (0..MAX_FIELDS).to_a * ";"
+        addImageFields = "#{NANO_API_PATH}/addImageFields/#{name}"
+
+        lefts   = (fields.collect { |field| field[:left].round   }) * ";"
+        tops    = (fields.collect { |field| field[:top].round    }) * ";"
+        heights = (fields.collect { |field| field[:height].round }) * ";"
+        widths  = (fields.collect { |field| field[:width].round  }) * ";"
+
+        addImageFields += "/#{field_ids}/#{lefts}/#{tops}/#{heights}/#{widths}/0.2/0.8" #TODO: remove params
+
+        logger.info "Attempting to add image: #{addImage}" if logger
+        logger.info "Attempting to add fields: #{addImageFields}" if logger
+
+        resp = connection.get(addImage) do |req|
           req.headers["Accept"] = "application/json"
           req.headers["Content-Type"] = "application/json"
         end
@@ -43,21 +58,7 @@ module Toscanini
         #TODO: something else if we don't get a 200
         #TODO: rescue exceptions
 
-        #call to addimagefields
-        fields = fields.slice 0..5
-        field_ids  = (0..5).to_a * ";"
-        request = "#{NANO_API_PATH}/addImageFields/#{name}"
-
-        lefts   = (fields.collect { |field| field[:left].round   }) * ";"
-        tops    = (fields.collect { |field| field[:top].round    }) * ";"
-        heights = (fields.collect { |field| field[:height].round }) * ";"
-        widths  = (fields.collect { |field| field[:width].round  }) * ";"
-
-        request += "/#{field_ids}/#{lefts}/#{tops}/#{heights}/#{widths}/0.2/0.8" #TODO: remove params
-
-        logger.info "Attempting to add fields: #{request}"
-
-        resp = connection.get(request) do |req|
+        resp = connection.get(addImageFields) do |req|
           req.headers["Accept"] = "application/json"
           req.headers["Content-Type"] = "application/json"
         end
@@ -67,8 +68,12 @@ module Toscanini
         #TODO: rescue exceptions
       end
 
-      def check_ocr_progress(name, subject_id)
-        connection.get("#{NANO_API_PATH}/isImageOCRed/#{name}") do |req|
+      def check_ocr_progress(name, logger = nil)
+        request = "#{NANO_API_PATH}/isImageOCRed/#{name}"
+
+        logger.info "checking #{request}" if logger
+
+        connection.get(request) do |req|
           req.headers["Accept"] = "application/json"
           req.headers["Content-Type"] = "application/json"
         end
