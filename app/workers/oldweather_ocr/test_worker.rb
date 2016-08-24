@@ -42,7 +42,7 @@ module Toscanini
           end
 
           logger.info "Processing input data"
-          RequestOCR.perform_async 1, 1, "https://panoptes-uploads.zooniverse.org/staging/subject_location/416134c3-0650-4414-9e05-7ea0c600ee4e.jpeg", contents
+          RequestOCR.perform_async 12345, 67890, "https://panoptes-uploads.zooniverse.org/staging/subject_location/416134c3-0650-4414-9e05-7ea0c600ee4e.jpeg", contents
 
           begin
           rescue NotImplementedError => ex

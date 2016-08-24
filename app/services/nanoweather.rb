@@ -79,8 +79,12 @@ module Toscanini
         end
       end
 
-      def fetch_ocr(name, subject_id)
-        connection.get("#{NANO_API_PATH}/getImageFields/#{name}") do |req|
+      def fetch_ocr(name, subject_id, logger = nil)
+        request = "#{NANO_API_PATH}/getImageFields/#{name}"
+
+        logger.info "fetching #{request}" if logger
+
+        connection.get(request) do |req|
           req.headers["Accept"] = "application/json"
           req.headers["Content-Type"] = "application/json"
         end

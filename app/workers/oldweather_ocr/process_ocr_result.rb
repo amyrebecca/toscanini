@@ -1,7 +1,10 @@
 module Toscanini
   module Workers
     module OldWeatherOCR
-      class ProcessOCRResult < ConfigurableWorker
+      class ProcessOCRResult
+
+        include Sidekiq::Worker
+
         attr_reader :client
 
         def initialize()
@@ -9,8 +12,8 @@ module Toscanini
         end
 
         def perform(name, subject_id)
-          result = client.fetch_ocr name, subject_id
-          logger.info "it worked"
+          logger.info "fetching OCR result for #{name}"
+          result = client.fetch_ocr name, subject_id, logger
           #TODO: process OCR extracts
         end
       end
