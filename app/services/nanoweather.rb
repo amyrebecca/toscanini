@@ -8,7 +8,8 @@ module Toscanini
       self.config_file = "nanoweather"
       self.api_prefix = "nanoweather"
 
-      NANO_API_PATH = "/Nanoweather/rest/Nanoweather"
+      NANO_API_PATH = "/NanoWeather/rest/NanoWeather"
+      NANO_DELIMITER = "~"
       MAX_FIELDS = 19
 
       attr_reader :connection
@@ -37,19 +38,17 @@ module Toscanini
 
         #call to addimagefields
         fields = fields.slice 0..MAX_FIELDS
-        field_ids  = (0..MAX_FIELDS).to_a * ";"
+        field_ids  = (0..MAX_FIELDS).to_a * NANO_DELIMITER
         addImageFields = "#{NANO_API_PATH}/addImageFields/#{name}"
 
-        lefts   = (fields.collect { |field| field[:left].round   }) * ";"
-        tops    = (fields.collect { |field| field[:top].round    }) * ";"
-        heights = (fields.collect { |field| field[:height].round }) * ";"
-        widths  = (fields.collect { |field| field[:width].round  }) * ";"
+        lefts   = (fields.collect { |field| field[:left].round   }) * NANO_DELIMITER
+        tops    = (fields.collect { |field| field[:top].round    }) * NANO_DELIMITER
+        heights = (fields.collect { |field| field[:height].round }) * NANO_DELIMITER
+        widths  = (fields.collect { |field| field[:width].round  }) * NANO_DELIMITER
 
         addImageFields += "/#{field_ids}/#{lefts}/#{tops}/#{heights}/#{widths}/0.2/0.8" #TODO: remove params
 
         logger.info "Attempting to add image: #{addImage}" if logger
-        logger.info "Attempting to add fields: #{addImageFields}" if logger
-
         resp = connection.get(addImage) do |req|
           req.headers["Accept"] = "application/json"
           req.headers["Content-Type"] = "application/json"
@@ -58,6 +57,7 @@ module Toscanini
         #TODO: something else if we don't get a 200
         #TODO: rescue exceptions
 
+        logger.info "Attempting to add fields: #{addImageFields}" if logger
         resp = connection.get(addImageFields) do |req|
           req.headers["Accept"] = "application/json"
           req.headers["Content-Type"] = "application/json"

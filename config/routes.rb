@@ -5,8 +5,10 @@ Rails.application.routes.draw do
 
     scope module: :v1 do
 
+      get "/NanoWeather/:action(/:id)", to: "nano_weather"
+
     end
-    
+
   end
 
 end
