@@ -78,9 +78,6 @@ GEM
       multipart-post (>= 1.2, < 3)
     faraday-http-cache (1.3.1)
       faraday (~> 0.8)
-    faraday-panoptes (0.2.0)
-      faraday (~> 0.9)
-      faraday_middleware (~> 0.10)
     faraday_middleware (0.10.0)
       faraday (>= 0.7.4, < 0.10)
     ffi (1.9.14-java)
@@ -107,9 +104,6 @@ GEM
     multi_json (1.12.1)
     multipart-post (2.0.0)
     nokogiri (1.6.8-java)
-    panoptes-client (0.2.7)
-      faraday
-      faraday-panoptes (~> 0.2.0)
     pry (0.10.4-java)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -148,6 +142,8 @@ GEM
     rdoc (4.2.2)
       json (~> 1.4)
     redis (3.3.1)
+    responders (2.3.0)
+      railties (>= 4.2.0, < 5.1)
     rspec (3.5.0)
       rspec-core (~> 3.5.0)
       rspec-expectations (~> 3.5.0)
@@ -215,9 +211,9 @@ DEPENDENCIES
   jbuilder (~> 2.0)
   jdbc-postgres
   json
-  panoptes-client
   pry
   rails (= 4.2.6)
+  responders
   rspec
   sdoc (~> 0.4.0)
   sidekiq

@@ -10,6 +10,7 @@ gem 'jbuilder', '~> 2.0'
 # bundle exec rake doc:rails generates the API under doc/api.
 gem 'sdoc', '~> 0.4.0', group: :doc
 
+gem 'activerecord-jdbcpostgresql-adapter'
 gem 'aws-sdk-v1'
 gem 'doorkeeper'
 gem 'dotenv'
@@ -18,11 +19,11 @@ gem 'faraday_middleware'
 gem 'faraday-http-cache'
 # gem 'puma'
 gem 'jdbc-postgres'
-gem 'activerecord-jdbcpostgresql-adapter'
 gem 'json'
+# gem 'panoptes-client'
+gem 'responders'
 gem 'sidekiq'
 gem 'sidetiq'
-gem 'panoptes-client'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'

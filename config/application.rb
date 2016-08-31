@@ -15,6 +15,9 @@ module Toscanini
     config.log_tags  = [:subdomain, :uuid]
     config.logger    = ActiveSupport::TaggedLogging.new(Logger.new(STDOUT))
 
+    config.autoload_paths += Dir[Rails.root.join('app', 'workers', '**/')]
+    config.eager_load_paths += Dir[Rails.root.join('app', 'workers', '**/')]
+
     # Since we're using Redis for Sidekiq, we might as well use Redis to back
     # our cache store. This keeps our application stateless as well.
     # config.cache_store = :redis_store, ENV['CACHE_URL'],
