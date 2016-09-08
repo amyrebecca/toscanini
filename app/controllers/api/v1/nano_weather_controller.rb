@@ -1,6 +1,3 @@
-# why is autoloading so flaky here?!
-# require '/tosca/app/workers/oldweather_ocr/request_ocr'
-
 class Api::V1::NanoWeatherController < ApplicationController
   respond_to :json
 
@@ -23,12 +20,6 @@ class Api::V1::NanoWeatherController < ApplicationController
       render json: false
     end
 
-  end
-
-  def doThing()
-    # respond_with(params) # should work but doesn't when using null_session
-    # render json: params
-    render json: request.raw_post
   end
 
 end

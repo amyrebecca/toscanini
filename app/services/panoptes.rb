@@ -10,7 +10,7 @@ module Toscanini
       self.config_file = "panoptes"
       self.api_prefix = "panoptes"
 
-      def initialize(url, client_id, client_secret)
+      def initialize()
         # @client = ::Panoptes::Client.new(url: url, auth: {client_id: client_id, client_secret: client_secret})
         @client = nil
       end

@@ -5,9 +5,6 @@ module OldWeatherOCR
 
     include Sidekiq::Worker
 
-    #TODO: remove when stable
-    sidekiq_options :retry => false
-
     attr_reader :nano_client
 
     def initialize()
@@ -17,8 +14,6 @@ module OldWeatherOCR
     def perform(subject_id, workflow_id, location, aggregation_results=nil)
 
       logger.info "OCR-ing subject #{subject_id}"
-
-      return unless aggregation_results # TODO: log that something went wrong
 
       begin
         rows = parse aggregation_results
@@ -32,14 +27,12 @@ module OldWeatherOCR
 
         # ask nanoweather to ocr the fields
         ocr_name = "zooniverse_#{subject_id}_#{workflow_id}_#{Time.now.getutc.to_i}"
-
         logger.info "Requesting OCR for #{ocr_name}"
         nano_client.request_ocr ocr_name, location, fields, logger
 
         # check every so often to see when the request is done
         PollOCR.perform_in(30.seconds, ocr_name, subject_id)
-      rescue NotImplementedError => ex
-        logger.warn "Failed to request OCR of subject #{ocr_name}: #{ex.to_s}"
+
       rescue Exception => ex
         logger.warn "Failed to request OCR of subject #{ocr_name}: #{ex.to_s}"
         raise

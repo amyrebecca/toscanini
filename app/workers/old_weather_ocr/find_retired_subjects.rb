@@ -14,11 +14,7 @@ module OldWeatherOCR
     OldWeatherGridWorkflowId = 1234
 
     def initialize()
-      panoptes_config = load_config("panoptes.yml", "development")
-      # TODO: shouldn't the panoptes service object know how to load its own config?
-      # @client = Toscanini::Services::Panoptes.new(panoptes_config.fetch("url"),
-      #                                        panoptes_config.fetch("client_id"),
-      #                                        panoptes_config.fetch("client_secret"))
+      # @client = Toscanini::Services::Panoptes.new()
       @client = nil
     end
 

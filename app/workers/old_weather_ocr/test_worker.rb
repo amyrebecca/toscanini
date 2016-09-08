@@ -7,7 +7,7 @@ module OldWeatherOCR
     sidekiq_options :retry => false
 
     recurrence do
-      secondly(30)
+      minutely(1)
     end
 
     def perform

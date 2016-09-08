@@ -13,7 +13,8 @@ module OldWeatherOCR
     end
 
     def is_ready?(result)
-      false
+      # false
+      true
     end
 
     def perform(name, subject_id)
@@ -25,7 +26,7 @@ module OldWeatherOCR
           self.class.perform_in(30.seconds, name, subject_id)
         end
       rescue Exception => ex
-        self.class.perform_in(30.seconds, name, subject_id)
+        # self.class.perform_in(30.seconds, name, subject_id)
         raise
       end
     end

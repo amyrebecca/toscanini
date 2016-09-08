@@ -31,9 +31,11 @@ module Toscanini
 
       def request_ocr(name, location, fields, logger = nil)
 
+        #TODO: add error handling
+
         #call to addimage
         addImage = "#{NANO_API_PATH}/addImage/#{name}"
-        addImage += "/#{location}/1500/2193" #TODO: we want them to remove these params
+        addImage += "/#{location}/1400/993" #TODO: we want them to remove these params
 
 
         #call to addimagefields
@@ -46,16 +48,13 @@ module Toscanini
         heights = (fields.collect { |field| field[:height].round }) * NANO_DELIMITER
         widths  = (fields.collect { |field| field[:width].round  }) * NANO_DELIMITER
 
-        addImageFields += "/#{field_ids}/#{lefts}/#{tops}/#{heights}/#{widths}/0.2/0.8" #TODO: remove params
+        addImageFields += "/#{field_ids}/#{lefts}/#{tops}/#{heights}/#{widths}/0.2/0.8"
 
         logger.info "Attempting to add image: #{addImage}" if logger
         resp = connection.get(addImage) do |req|
           req.headers["Accept"] = "application/json"
           req.headers["Content-Type"] = "application/json"
         end
-
-        #TODO: something else if we don't get a 200
-        #TODO: rescue exceptions
 
         logger.info "Attempting to add fields: #{addImageFields}" if logger
         resp = connection.get(addImageFields) do |req|
@@ -64,8 +63,6 @@ module Toscanini
         end
 
         resp
-        #TODO: something else if we don't get a 200
-        #TODO: rescue exceptions
       end
 
       def check_ocr_progress(name, logger = nil)
