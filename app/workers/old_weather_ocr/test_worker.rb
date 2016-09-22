@@ -6,9 +6,9 @@ module OldWeatherOCR
 
     sidekiq_options :retry => false
 
-    recurrence do
-      minutely(1)
-    end
+    # recurrence do
+      # minutely(1)
+    # end
 
     def perform
       logger.debug "Checking for input CSV file"
@@ -26,7 +26,7 @@ module OldWeatherOCR
       logger.debug "Processing input.csv"
 
       contents = nil
-      file = File.open "tmp/input/input.csv","rb"
+      file = File.open "tmp/input/input.csv","rt"
 
       begin
         contents = file.read

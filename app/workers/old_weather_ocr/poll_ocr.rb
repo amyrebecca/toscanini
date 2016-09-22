@@ -12,22 +12,23 @@ module OldWeatherOCR
       @client = ::Toscanini::Services::Nanoweather.new()
     end
 
-    def is_ready?(result)
-      # false
-      true
+    def is_ready?(response)
+      response && response.body && response.body == "100"
     end
 
     def perform(name, subject_id)
       begin
-        result = client.check_ocr_progress name, logger
-        if is_ready? result
+        response = client.check_ocr_progress name, logger
+        if is_ready? response
           ProcessOCRResult.perform_async name, subject_id
         else
+          # nil
           self.class.perform_in(30.seconds, name, subject_id)
         end
       rescue Exception => ex
-        # self.class.perform_in(30.seconds, name, subject_id)
-        raise
+        #TODO: log exception
+        # nil
+        self.class.perform_in(30.seconds, name, subject_id)
       end
     end
 

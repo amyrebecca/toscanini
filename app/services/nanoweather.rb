@@ -1,4 +1,5 @@
 require 'faraday'
+# require 'cgi'
 
 module Toscanini
   module Services
@@ -10,7 +11,7 @@ module Toscanini
 
       NANO_API_PATH = "/NanoWeather/rest/NanoWeather"
       NANO_DELIMITER = "~"
-      MAX_FIELDS = 19
+      MAX_FIELDS = 135
 
       attr_reader :connection
 
@@ -34,33 +35,39 @@ module Toscanini
         #TODO: add error handling
 
         #call to addimage
-        addImage = "#{NANO_API_PATH}/addImage/#{name}"
-        addImage += "/#{location}/1400/993" #TODO: we want them to remove these params
-
+        # addImage = "#{NANO_API_PATH}/addImage/#{name}/#{CGI.escape location}"
+        addImage = "#{NANO_API_PATH}/addImage/#{name}/#{location}"
 
         #call to addimagefields
         fields = fields.slice 0..MAX_FIELDS
         field_ids  = (0..MAX_FIELDS).to_a * NANO_DELIMITER
         addImageFields = "#{NANO_API_PATH}/addImageFields/#{name}"
 
-        lefts   = (fields.collect { |field| field[:left].round   }) * NANO_DELIMITER
-        tops    = (fields.collect { |field| field[:top].round    }) * NANO_DELIMITER
-        heights = (fields.collect { |field| field[:height].round }) * NANO_DELIMITER
-        widths  = (fields.collect { |field| field[:width].round  }) * NANO_DELIMITER
+        lefts   = (fields.collect { |field| field[:left]}) * NANO_DELIMITER
+        tops    = (fields.collect { |field| field[:top]}) * NANO_DELIMITER
+        heights = (fields.collect { |field| field[:height]}) * NANO_DELIMITER
+        widths  = (fields.collect { |field| field[:width]}) * NANO_DELIMITER
 
-        addImageFields += "/#{field_ids}/#{lefts}/#{tops}/#{heights}/#{widths}/0.2/0.8"
+        addImageFields += "/#{field_ids}/#{lefts}/#{tops}/#{heights}/#{widths}"
 
         logger.info "Attempting to add image: #{addImage}" if logger
         resp = connection.get(addImage) do |req|
-          req.headers["Accept"] = "application/json"
-          req.headers["Content-Type"] = "application/json"
+          req.headers["Accept"] = "text/plain"
+          # req.headers["Accept"] = "application/json"
+          # req.headers["Content-Type"] = "application/json"
         end
+        # logger.info "HTTP #{resp.status} #{resp.body}" unless resp.status == 200
+
+        logger.info "sleeping, work fast!"
+        sleep 30
 
         logger.info "Attempting to add fields: #{addImageFields}" if logger
         resp = connection.get(addImageFields) do |req|
-          req.headers["Accept"] = "application/json"
-          req.headers["Content-Type"] = "application/json"
+          req.headers["Accept"] = "text/plain"
+          # req.headers["Accept"] = "application/json"
+          # req.headers["Content-Type"] = "application/json"
         end
+        logger.info "HTTP #{resp.status} #{resp.body}" unless resp.status == 200
 
         resp
       end
@@ -70,21 +77,52 @@ module Toscanini
 
         logger.info "checking #{request}" if logger
 
-        connection.get(request) do |req|
-          req.headers["Accept"] = "application/json"
-          req.headers["Content-Type"] = "application/json"
+        resp = connection.get(request) do |req|
+          req.headers["Accept"] = "text/plain"
         end
+        logger.info "HTTP #{resp.status} #{resp.body}" unless resp.status == 200
+
+        resp
       end
 
       def fetch_ocr(name, subject_id, logger = nil)
         request = "#{NANO_API_PATH}/getImageFields/#{name}"
 
-        logger.info "fetching #{request}" if logger
-
-        connection.get(request) do |req|
+        resp = connection.get(request) do |req|
           req.headers["Accept"] = "application/json"
           req.headers["Content-Type"] = "application/json"
         end
+        logger.info "HTTP #{resp.status} #{resp.body}" unless resp.status == 200
+
+        resp
+      end
+
+      #TODO: deprecate when getImageFields is correct
+      def fetch_ocrval(name, fieldname, logger = nil)
+        request = "#{NANO_API_PATH}/getImageFieldOCRVal/#{name}/#{fieldname}"
+
+        resp = connection.get(request) do |req|
+          req.headers["Accept"] = "text/plain"
+          # req.headers["Accept"] = "application/json"
+          # req.headers["Content-Type"] = "application/json"
+        end
+        logger.info "HTTP #{resp.status} #{resp.body}" unless resp.status == 200
+
+        resp
+      end
+
+      #TODO: deprecate when getImageFields is correct
+      def fetch_confidence(name, fieldname, logger = nil)
+        request = "#{NANO_API_PATH}/getImageFieldConfidence/#{name}/#{fieldname}"
+
+        resp = connection.get(request) do |req|
+          req.headers["Accept"] = "text/plain"
+          # req.headers["Accept"] = "application/json"
+          # req.headers["Content-Type"] = "application/json"
+        end
+        logger.info "HTTP #{resp.status} #{resp.body}" unless resp.status == 200
+
+        resp
       end
 
     end

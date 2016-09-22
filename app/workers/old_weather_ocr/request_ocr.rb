@@ -21,14 +21,16 @@ module OldWeatherOCR
 
         # build field hashes for each row with enough matches
         rows.each do | row |
-          next if row[:boxes_in_cluster] < 5
+          next unless row[:boxes_in_cluster] > 3
           fields.push (pluck row)
         end
+
+        sorted = fields.sort_by{ |elem| [elem[:top], elem[:left]] }
 
         # ask nanoweather to ocr the fields
         ocr_name = "zooniverse_#{subject_id}_#{workflow_id}_#{Time.now.getutc.to_i}"
         logger.info "Requesting OCR for #{ocr_name}"
-        nano_client.request_ocr ocr_name, location, fields, logger
+        nano_client.request_ocr ocr_name, location, sorted, logger
 
         # check every so often to see when the request is done
         PollOCR.perform_in(30.seconds, ocr_name, subject_id)
@@ -42,10 +44,10 @@ module OldWeatherOCR
 
     def pluck(row)
       {
-        top: row[:agg_tl_y],
-        left: row[:agg_tl_x],
-        width: row[:agg_width],
-        height: row[:agg_height]
+        top: row[:agg_tl_y].round,
+        left: row[:agg_tl_x].round,
+        width: row[:agg_width].round,
+        height: row[:agg_height].round
       }
     end
 
